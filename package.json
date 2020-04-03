@@ -1,0 +1,22 @@
+{
+  "name": "expenses-log",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "server:start": "yarn --cwd packages/server node .",
+    "app:serve": "yarn --cwd packages/app ionic serve",
+    "app:start": "yarn --cwd packages/app start",
+    "app:build": "yarn --cwd packages/app build",
+    "app:eject": "yarn --cwd packages/app eject",
+    "app:test": "yarn --cwd packages/app test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@ionic/cli": "^6.4.1",
+    "firebase": "^7.13.1"
+  }
+}
