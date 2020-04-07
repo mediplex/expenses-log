@@ -1,61 +1,117 @@
 import {
-  IonButton,
-  IonInput,
   IonContent,
-  IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
   IonFab,
   IonFabButton,
   IonIcon,
-  IonGrid,
-  IonRow,
-  IonCol,
+  IonModal,
+  IonButton,
   IonImg,
-  IonActionSheet
+  IonItemDivider,
+  IonItem,
+  IonInput,
+  IonLabel,
+  IonList,
 } from "@ionic/react";
-import { camera, trash, close } from "ionicons/icons";
-import React from "react";
-import "./Home.css";
+import { camera } from "ionicons/icons";
+import React, { useState, useCallback } from "react";
 
-import { usePhotoGallery } from "../hooks/usePhotoGallery";
+import { useCamera } from "@ionic/react-hooks/camera";
+import {
+  CameraResultType,
+  CameraSource,
+  CameraOptions,
+  CameraDirection,
+} from "@capacitor/core";
 
-const Home = () => {
-  const { photos, takePhoto } = usePhotoGallery();
+import axios from "axios";
+
+const initialValues = {
+  category: "",
+  debiter: "",
+  date: "",
+  paymentMethod: "Cash",
+  amount: 0.0,
+  currency: "TRY",
+  responsible: "", // should come from the current logged user or predefined list
+  note: "",
+};
+
+const cameraOptions: CameraOptions = {
+  resultType: CameraResultType.Base64,
+  correctOrientation: true,
+  allowEditing: true,
+  direction: CameraDirection.Front,
+  presentationStyle: "fullscreen",
+  quality: 100,
+  saveToGallery: false,
+  source: CameraSource.Prompt,
+};
+
+export const Home = () => {
+  const [showModal, setShowModal] = useState(false);
+  const { isAvailable, getPhoto, photo } = useCamera();
+  const [values, setValues] = useState(initialValues);
+
+  const triggerCamera = useCallback(async () => {
+    if (isAvailable) {
+      console.log("Camera is available");
+      getPhoto(cameraOptions)
+        .then(() => {
+          setShowModal(true);
+        })
+        .catch((err) => console.log(err));
+    } else console.log("Camera is not available");
+  }, [getPhoto]);
+
+  const submit = (e) => {
+    e.preventDefault();
+
+    const cleanData = {
+      image: photo.base64String,
+      values: [[...Object.values(values)]],
+    };
+
+    // show spinner
+    axios
+      .post("http://127.0.0.1:8080/api/addInvoice", cleanData, {
+        headers: { "Content-Type": "application/json" },
+      })
+      .then(function (response) {
+        console.log(response);
+        // close spinner
+        //modal info
+        setShowModal(false);
+      })
+      .catch(function (error) {
+        // close spinner
+        // modal info
+        console.log(error);
+      });
+  };
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Expense Log</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Blank</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-
-        <IonGrid>
-          <IonRow>
-            {photos.map((photo, index) => (
-              <IonCol size="6" key={index}>
-                <IonImg src={photo.webviewPath} />
-              </IonCol>
-            ))}
-          </IonRow>
-        </IonGrid>
-
-        <IonFab vertical="bottom" horizontal="center" slot="fixed">
-          <IonFabButton onClick={() => takePhoto()}>
-            <IonIcon icon={camera}></IonIcon>
+      <IonContent fullscreen={true}>
+        <IonFab vertical="center" horizontal="center" slot="fixed">
+          <IonFabButton onClick={() => triggerCamera()}>
+            <IonIcon icon={camera} />
           </IonFabButton>
         </IonFab>
+
+        <IonModal
+          isOpen={showModal}
+          onDidDismiss={() => setShowModal(false)}
+          swipeToClose={false}
+        >
+          <IonContent>
+            {photo && (
+              <IonImg src={`data:image/png;base64, ${photo.base64String}`} />
+            )}
+            <IonButton onClick={submit}>Close Modal</IonButton>
+          </IonContent>
+        </IonModal>
       </IonContent>
     </IonPage>
   );
 };
-
-export default Home;
