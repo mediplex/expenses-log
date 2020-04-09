@@ -14,6 +14,10 @@ import {
   IonPicker,
   IonIcon,
   IonInput,
+  IonFabList,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
 } from "@ionic/react";
 import {
   calendarOutline,
@@ -22,6 +26,8 @@ import {
   cashOutline,
   walletOutline,
   createOutline,
+  paperPlaneOutline,
+  globeOutline,
 } from "ionicons/icons";
 import { camera } from "ionicons/icons";
 import React, { useState, useCallback, useEffect } from "react";
@@ -38,7 +44,8 @@ import axios from "axios";
 import { Languages } from "../data/Languages";
 import { RESOURCES } from "../data/resources";
 
-const language: Languages = Languages.Turkish as Languages;
+import './Home.css'
+
 
 const initialValues = {
   category: "",
@@ -65,8 +72,9 @@ const cameraOptions: CameraOptions = {
 // console.log(navigator.language);
 
 export const Home = () => {
-  const [canSubmit, setCanSubmit] = useState(false)
-  const [showModal, setShowModal] = useState(true);
+  const [language, setLanguage] = useState(Languages.English)
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editingControl, setEditingControl] = useState(null);
   const [pickerAttributes, setPickerAttributes] = useState({
     columns: [],
@@ -75,19 +83,18 @@ export const Home = () => {
   const { isAvailable, getPhoto, photo } = useCamera();
   const [values, setValues] = useState(initialValues);
 
-  useEffect(()=>{
-  if (
-    values.amount !== '' &&
-    values.category !== '' &&
-    values.currency !== '' &&
-    values.paymentMethod !== '' &&
-    values.responsible !== '' &&
-    values.supplier !== '' &&
-    values.transactionDate !== '' 
-
-  ) setCanSubmit(true)
-
-  },[values])
+  useEffect(() => {
+    if (
+      values.amount !== "" &&
+      values.category !== "" &&
+      values.currency !== "" &&
+      values.paymentMethod !== "" &&
+      values.responsible !== "" &&
+      values.supplier !== "" &&
+      values.transactionDate !== ""
+    )
+      setCanSubmit(true);
+  }, [values]);
 
   const triggerCamera = useCallback(async () => {
     if (isAvailable) {
@@ -102,17 +109,8 @@ export const Home = () => {
 
   const submit = (e) => {
     e.preventDefault();
-    // 0 1 3 5
-    const transValues = new Array(8);
 
-    //0 category: "",
-    // supplier: "",
-    // transactionDate: "",
-    //3 paymentMethod: "",
-    // amount: "",
-    //5 currency: "",
-    // responsible: "Mehdi Karim", // should come from the current logged user or predefined list
-    // notes: "",
+    const transValues = new Array(8);
 
     Object.values(values).map((value, index) => {
       switch (index) {
@@ -312,12 +310,21 @@ export const Home = () => {
         </IonFab>
 
         <IonModal
+          cssClass={'modal'}
           isOpen={showModal}
           onDidDismiss={() => setShowModal(false)}
           swipeToClose={false}
         >
+           <IonHeader translucent>
+            <IonToolbar>
+              <IonTitle>Modal Content</IonTitle>
+              {/* <ion-buttons slot="end">
+                <ion-button onclick="dismissModal()">Close</ion-button>
+              </ion-buttons> */}
+            </IonToolbar>
+          </IonHeader>
           <IonContent fullscreen={true}>
-            <form onSubmit={submit}>
+            <form className={'form'} onSubmit={submit}>
               <>
                 {photo && (
                   <IonImg
@@ -531,15 +538,28 @@ export const Home = () => {
               </IonList>
 
               <IonButton
-              disabled={!canSubmit}
+                disabled={!canSubmit}
                 expand="block"
                 type="submit"
-                className="ion-padding ion-margin"
+                className=" ion-margin"
               >
-                Send
+                <IonIcon slot="start" icon={paperPlaneOutline} />
+                {RESOURCES[language].sendButtonText}
               </IonButton>
             </form>
+
+           
           </IonContent>
+          <IonFab vertical="bottom" horizontal="end" slot="fixed">
+              <IonFabButton>
+                <IonIcon icon={globeOutline} />
+              </IonFabButton>
+              <IonFabList side="start">
+                <IonFabButton color={language === Languages.Turkish ? "primary" : "medium"} onClick={()=> setLanguage(Languages.Turkish)}>TR</IonFabButton>
+                <IonFabButton color={language === Languages.English ? "primary" : "medium"} onClick={()=> setLanguage(Languages.English)}>EN</IonFabButton>
+                <IonFabButton color={language === Languages.Arabic ? "primary" : "medium"} onClick={()=> setLanguage(Languages.Arabic)}>AR</IonFabButton>
+              </IonFabList>
+            </IonFab>
         </IonModal>
       </IonContent>
     </IonPage>

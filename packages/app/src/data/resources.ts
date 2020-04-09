@@ -155,56 +155,68 @@ const amountResources = {
     amountLabel: "Amount",
     currencyLabel: "Currency",
     currencyOptions: {
-      "TRY": "TRY",
-      USD:"USD",
-      EUR: "EUR"
-    }
+      TRY: "TRY",
+      USD: "USD",
+      EUR: "EUR",
+    },
   },
   ar: {
     amountLabel: "مبلغ",
     currencyLabel: "عملة",
     currencyOptions: {
-      "TRY": "TRY",
-      USD:"USD",
-      EUR: "EUR"
-    }
+      TRY: "TRY",
+      USD: "USD",
+      EUR: "EUR",
+    },
   },
   tr: {
     amountLabel: "Tutar",
     currencyLabel: "Para Birimi",
     currencyOptions: {
-      "TRY": "TRY",
-      USD:"USD",
-      EUR: "EUR"
-    }
+      TRY: "TRY",
+      USD: "USD",
+      EUR: "EUR",
+    },
   },
 };
 
 const notesResources = {
-  en :{
-    notesLabel: 'Notes'
+  en: {
+    notesLabel: "Notes",
   },
-  ar :{
-    notesLabel: 'ملاحظات'
+  ar: {
+    notesLabel: "ملاحظات",
   },
-  tr :{
-    notesLabel: 'notlar'
+  tr: {
+    notesLabel: "notlar",
   },
-}
+};
 const supplierResources = {
-  en :{
-    supplierLabel: 'Supplier'
+  en: {
+    supplierLabel: "Supplier",
   },
-  ar :{
-    supplierLabel: 'مورد'
+  ar: {
+    supplierLabel: "مورد",
   },
-  tr :{
-    supplierLabel: 'Tedarikçi'
+  tr: {
+    supplierLabel: "Tedarikçi",
   },
-}
+};
+const sendButtonResources = {
+  en: {
+    sendButtonText: "Submit",
+  },
+  ar: {
+    sendButtonText: "إرسال",
+  },
+  tr: {
+    sendButtonText: "Sunmak",
+  },
+};
 
 export const RESOURCES = {
   en: {
+    ...sendButtonResources.en,
     ...supplierResources.en,
     ...notesResources.en,
     ...amountResources.en,
@@ -214,6 +226,7 @@ export const RESOURCES = {
     ...pickerResources.en,
   },
   ar: {
+    ...sendButtonResources.ar,
     ...supplierResources.ar,
     ...notesResources.ar,
     ...amountResources.ar,
@@ -223,6 +236,7 @@ export const RESOURCES = {
     ...pickerResources.ar,
   },
   tr: {
+    ...sendButtonResources.tr,
     ...supplierResources.tr,
     ...notesResources.tr,
     ...amountResources.tr,
