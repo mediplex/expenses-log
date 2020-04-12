@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "Expenses Log",
   "integrations": {
     "capacitor": {}
   },

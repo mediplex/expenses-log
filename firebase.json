@@ -1,0 +1,21 @@
+{
+  "functions": {
+    "source": "packages/functions",
+    "predeploy": [
+    ]
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  },
+  "emulators": {
+    "functions": {
+      "host": "localhost",
+      "port": "8081"
+    }
+  }
+}

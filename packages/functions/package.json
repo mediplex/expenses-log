@@ -1,0 +1,25 @@
+{
+  "name": "@expenses-log/functions",
+  "version": "0.0.1",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "yarn run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "10"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "firebase-admin": "^8.9.0",
+    "firebase-functions": "^3.3.0",
+    "googleapis": "^48.0.0"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.1.6"
+  },
+  "private": true
+}

@@ -18,6 +18,8 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
+  IonLoading,
+  IonToast,
 } from "@ionic/react";
 import {
   calendarOutline,
@@ -30,7 +32,7 @@ import {
   globeOutline,
 } from "ionicons/icons";
 import { camera } from "ionicons/icons";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 
 import { useCamera } from "@ionic/react-hooks/camera";
 import {
@@ -41,11 +43,10 @@ import {
 } from "@capacitor/core";
 
 import axios from "axios";
-import { Languages } from "../data/Languages";
+import { Languages } from "../enums/Languages";
 import { RESOURCES } from "../data/resources";
 
-import './Home.css'
-
+import "./Home.css";
 
 const initialValues = {
   category: "",
@@ -61,7 +62,7 @@ const initialValues = {
 const cameraOptions: CameraOptions = {
   resultType: CameraResultType.Base64,
   correctOrientation: true,
-  allowEditing: true,
+  // allowEditing: true,
   direction: CameraDirection.Front,
   presentationStyle: "fullscreen",
   quality: 100,
@@ -70,18 +71,30 @@ const cameraOptions: CameraOptions = {
 };
 
 // console.log(navigator.language);
+// console.log(navigator.onLine);
+// console.log(navigator.storage);
 
 export const Home = () => {
-  const [language, setLanguage] = useState(Languages.English)
+  const [showLoading, setShowLoading] = useState(false);
+  const [language, setLanguage] = useState(Languages.English);
   const [canSubmit, setCanSubmit] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingControl, setEditingControl] = useState(null);
+  const [toast, setToast] = useState({
+    message: "",
+    isOpen: false,
+    duration: 1000,
+    color: "",
+  });
   const [pickerAttributes, setPickerAttributes] = useState({
     columns: [],
     isOpen: false,
   });
   const { isAvailable, getPhoto, photo } = useCamera();
   const [values, setValues] = useState(initialValues);
+
+  const supplierInputRef = useRef(null);
+  const amountInputRef = useRef(null);
 
   useEffect(() => {
     if (
@@ -98,17 +111,18 @@ export const Home = () => {
 
   const triggerCamera = useCallback(async () => {
     if (isAvailable) {
-      console.log("Camera is available");
       getPhoto(cameraOptions)
         .then(() => {
           setShowModal(true);
         })
-        .catch((err) => console.log(err));
-    } else console.log("Camera is not available");
-  }, [isAvailable, getPhoto]);
+        .catch((err) =>setToast({...toast,color:"danger", isOpen:true, message: err}));
+    } else setToast({...toast,color:"warning", isOpen:true, message:'The camera is not available'})
+  }, [isAvailable, getPhoto, toast]);
 
   const submit = (e) => {
     e.preventDefault();
+
+    setShowLoading(true);
 
     const transValues = new Array(8);
 
@@ -147,26 +161,43 @@ export const Home = () => {
 
     // show spinner
     axios
-      .post("http://127.0.0.1:8080/api/addInvoice", cleanData, {
-        headers: { "Content-Type": "application/json" },
-      })
+      .post(
+        "https://us-central1-golden-stream-turkey.cloudfunctions.net/s/api/addInvoice",
+        cleanData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      )
       .then(function (response) {
-        console.log(response);
-        // close spinner
-        //modal info
         setShowModal(false);
         setValues(initialValues);
+        setShowLoading(false);
+        setToast({
+          ...toast,
+          isOpen: true,
+          color: "success",
+          message: RESOURCES[language].toastSuccessMessage,
+        });
       })
       .catch(function (error) {
-        // close spinner
-        // modal info
-        console.log(error);
+        setShowLoading(false);
+        setToast({
+          ...toast,
+          isOpen: true,
+          color: "danger",
+          message: RESOURCES[language].toastFailureMessage,
+        });
       });
   };
 
+  const getFocus = () => {
+    console.log('get focus')
+    supplierInputRef.current.focus();
+  }
+
+
   const handlePicker = (id) => {
     setEditingControl(id);
-    console.log(id);
     switch (id) {
       case RESOURCES[Languages.English].transactionDateLabel:
         const date = new Date();
@@ -271,15 +302,14 @@ export const Home = () => {
         break;
 
       case RESOURCES[Languages.English].categoryLabel:
-        console.log(e);
         setValues({
           ...values,
           category: `${e[RESOURCES[Languages.English].categoryLabel].value}`,
         });
+        getFocus();
         break;
 
       case RESOURCES[Languages.English].paymentMethodLabel:
-        console.log(e);
         setValues({
           ...values,
           paymentMethod: `${
@@ -310,48 +340,42 @@ export const Home = () => {
         </IonFab>
 
         <IonModal
-          cssClass={'modal'}
+          cssClass={"modal"}
           isOpen={showModal}
           onDidDismiss={() => setShowModal(false)}
           swipeToClose={false}
         >
-           <IonHeader translucent>
+          <IonHeader translucent>
             <IonToolbar>
-              <IonTitle>Modal Content</IonTitle>
-              {/* <ion-buttons slot="end">
-                <ion-button onclick="dismissModal()">Close</ion-button>
-              </ion-buttons> */}
+              <IonTitle>Expenses App</IonTitle>
             </IonToolbar>
           </IonHeader>
           <IonContent fullscreen={true}>
-            <form className={'form'} onSubmit={submit}>
-              <>
-                {photo && (
-                  <IonImg
-                    className="ion-margin-bottom"
-                    src={`data:image/png;base64, ${photo.base64String}`}
-                  />
-                )}
-              </>
-              <IonList lines="full" className="ion-no-margin ion-no-padding">
-                {/* Picker */}
-                <IonPicker
-                  //cssClass= 'ion-hide'
-                  columns={pickerAttributes.columns}
-                  isOpen={pickerAttributes.isOpen}
-                  buttons={[
-                    {
-                      text: RESOURCES[language].pickerOkButton,
-                      handler: handlePickerOk,
-                    },
-                  ]}
-                  onDidDismiss={() =>
-                    setPickerAttributes({ ...pickerAttributes, isOpen: false })
-                  }
+            <form className={"form"} onSubmit={submit}>
+              {photo && (
+                <IonImg
+                  className="ion-margin-bottom"
+                  src={`data:image/png;base64, ${photo.base64String}`}
                 />
+              )}
 
+              {/* Picker */}
+              <IonPicker
+                columns={pickerAttributes.columns}
+                isOpen={pickerAttributes.isOpen}
+                buttons={[
+                  {
+                    text: RESOURCES[language].pickerOkButton,
+                    handler: handlePickerOk,
+                  },
+                ]}
+                onDidDismiss={() =>setPickerAttributes({ ...pickerAttributes, isOpen: false })}
+              />
+
+              <IonList lines="full" className="ion-no-margin ion-no-padding">
                 {/* Category */}
                 <IonItem
+                  tabIndex={1}
                   button
                   detail={false}
                   onClick={() => {
@@ -390,6 +414,10 @@ export const Home = () => {
                     <IonText color="danger"> *</IonText>
                   </IonLabel>
                   <IonInput
+                    tabIndex={2}
+                    onFocus={()=> console.log('got focus')}
+                    onBlur={()=> console.log('lost focus')}
+                    ref={supplierInputRef}
                     className="ion-no-padding"
                     placeholder="..."
                     dir={language === Languages.Arabic ? "ltr" : "rtl"}
@@ -404,6 +432,7 @@ export const Home = () => {
 
                 {/* Transaction Date */}
                 <IonItem
+                  tabIndex={3}
                   button
                   detail={false}
                   onClick={() => {
@@ -431,6 +460,7 @@ export const Home = () => {
 
                 {/* Payment Method */}
                 <IonItem
+                  tabIndex={4}
                   button
                   detail={false}
                   onClick={() => {
@@ -471,6 +501,8 @@ export const Home = () => {
                     <IonText color="danger"> *</IonText>
                   </IonLabel>
                   <IonInput
+                    ref={amountInputRef}
+                    tabIndex={5}
                     className="ion-no-padding"
                     placeholder="..."
                     min="0"
@@ -488,6 +520,7 @@ export const Home = () => {
 
                 {/* Currency */}
                 <IonItem
+                  tabIndex={6}
                   button
                   detail={false}
                   onClick={() => {
@@ -513,6 +546,7 @@ export const Home = () => {
 
                 {/* Notes */}
                 <IonItem
+                  tabIndex={7}
                   detail={false}
                   dir={language === Languages.Arabic ? "rtl" : "ltr"}
                 >
@@ -538,6 +572,7 @@ export const Home = () => {
               </IonList>
 
               <IonButton
+                tabIndex={8}
                 disabled={!canSubmit}
                 expand="block"
                 type="submit"
@@ -547,20 +582,54 @@ export const Home = () => {
                 {RESOURCES[language].sendButtonText}
               </IonButton>
             </form>
-
-           
           </IonContent>
-          <IonFab vertical="bottom" horizontal="end" slot="fixed">
-              <IonFabButton>
-                <IonIcon icon={globeOutline} />
+          <IonFab
+            vertical="bottom"
+            horizontal="end"
+            slot="fixed"
+            color="medium"
+          >
+            <IonFabButton>
+              <IonIcon icon={globeOutline} />
+            </IonFabButton>
+            <IonFabList side="start">
+              <IonFabButton
+                color={language === Languages.Turkish ? "primary" : "medium"}
+                onClick={() => setLanguage(Languages.Turkish)}
+              >
+                TR
               </IonFabButton>
-              <IonFabList side="start">
-                <IonFabButton color={language === Languages.Turkish ? "primary" : "medium"} onClick={()=> setLanguage(Languages.Turkish)}>TR</IonFabButton>
-                <IonFabButton color={language === Languages.English ? "primary" : "medium"} onClick={()=> setLanguage(Languages.English)}>EN</IonFabButton>
-                <IonFabButton color={language === Languages.Arabic ? "primary" : "medium"} onClick={()=> setLanguage(Languages.Arabic)}>AR</IonFabButton>
-              </IonFabList>
-            </IonFab>
+              <IonFabButton
+                color={language === Languages.English ? "primary" : "medium"}
+                onClick={() => setLanguage(Languages.English)}
+              >
+                EN
+              </IonFabButton>
+              <IonFabButton
+                color={language === Languages.Arabic ? "primary" : "medium"}
+                onClick={() => setLanguage(Languages.Arabic)}
+              >
+                AR
+              </IonFabButton>
+            </IonFabList>
+          </IonFab>
         </IonModal>
+
+        <IonLoading
+          isOpen={showLoading}
+          // onDidDismiss={() => setShowLoading(false)}
+          message={"Please wait..."}
+          duration={0}
+        />
+
+        <IonToast
+          cssClass="ion-text-center"
+          isOpen={toast.isOpen}
+          onDidDismiss={() => setToast({ ...toast, isOpen: false })}
+          message={toast.message}
+          duration={toast.duration}
+          color={toast.color}
+        />
       </IonContent>
     </IonPage>
   );

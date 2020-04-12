@@ -1,8 +1,8 @@
 {
   "appId": "io.ionic.starter",
-  "appName": "app",
+  "appName": "Expenses Log",
   "bundledWebRuntime": false,
-  "npmClient": "npm",
+  "npmClient": "yarn",
   "webDir": "build",
   "cordova": {}
 }
