@@ -11,8 +11,12 @@ const scopes = [
   "https://www.googleapis.com/auth/drive",
 ];
 
-const spreadsheetId = "1BymkLET87gEhjx0veRa5b58GApYdkXsY";
-const range = "Expenses Log!A:J";
+const spreadsheetId ="1RgDVfPPJDD3UoMDW3c2e3FwToyU8iwuoS6twq0Fs52Y"
+
+const salesFolderId = "16c9QRyyCqKVfTU_MiWbN-9e00Z-d3sIG";
+const purchasesFolderId = "1BymkLET87gEhjx0veRa5b58GApYdkXsY";
+const purchasesRange = "Purchases Log!A:J";
+const salesRange = "Sales Log!A:J";
 
 const credentials = {
   private_key:
@@ -43,12 +47,12 @@ auth.authorize((err) => {
 const googleSheetsApi = google.sheets({ version: "v4", auth });
 const googleDriveApi = google.drive({ version: "v3", auth });
 
-//
+// Purchase
 
-const addInvoice = async ({ values, image }) => {
+const addPurchase = async ({ values, image }) => {
   const date = new Date(); // can use the date field
 
-  const invoiceId = `GS-${date
+  const OperationId = `GSP-${date
     .getDate()
     .toString()
     .padStart(2, "0")}${date
@@ -74,10 +78,9 @@ const addInvoice = async ({ values, image }) => {
   const fileId = await googleDriveApi.files
     .create({
       resource: {
-        name: invoiceId,
-        parents: [spreadsheetId],
+        name: OperationId,
+        parents: [purchasesFolderId],
       },
-      ocrLanguage: "tr",
       media: {
         mimeType: "image/jpeg",
         body: stream,
@@ -92,12 +95,12 @@ const addInvoice = async ({ values, image }) => {
 
   // push photo url and invoice id
 
-  values[0].splice(0, 0, `https://us-central1-golden-stream-turkey.cloudfunctions.net/s//getInvoiceCopy/${fileId}`);
-  values[0].splice(0, 0, invoiceId);
+  values[0].splice(0, 0, `https://us-central1-golden-stream-turkey.cloudfunctions.net/server/retrivePurchaseInvoicePhoto/${fileId}`);
+  values[0].splice(0, 0, OperationId);
   googleSheetsApi.spreadsheets.values
     .append({
-      spreadsheetId: "1RgDVfPPJDD3UoMDW3c2e3FwToyU8iwuoS6twq0Fs52Y",
-      range,
+      spreadsheetId,
+      range: purchasesRange,
       insertDataOption: "INSERT_ROWS",
       resource: { values },
       valueInputOption: "RAW",
@@ -106,7 +109,7 @@ const addInvoice = async ({ values, image }) => {
     .catch((err) => console.error(err));
 };
 
-const getInvoiceFilePath = async (fileId) => {
+const retrivePurchaseInvoicePhoto = async (fileId) => {
   return await googleDriveApi.files
     .get({ fileId, alt: "media" }, { responseType: "stream" })
     .then((res) => {
@@ -140,6 +143,107 @@ const getInvoiceFilePath = async (fileId) => {
     });
 };
 
+
+// Sales
+
+const addSale = async ({ values, image }) => {
+  const date = new Date(); // can use the date field
+
+  const OperationId = `GSS-${date
+    .getDate()
+    .toString()
+    .padStart(2, "0")}${date
+    .getMonth()
+    .toString()
+    .padStart(2, "0")}${date
+    .getFullYear()
+    .toString()
+    .padStart(4, "0")}-${Math.random()
+    .toString(36)
+    .substring(2, 11)
+    .toUpperCase()}`;
+
+  // upload data
+
+  const buffer = Buffer.from(image, "base64");
+  const { Duplex } = require("stream");
+
+  const stream = new Duplex();
+  stream.push(buffer);
+  stream.push(null);
+
+  const fileId = await googleDriveApi.files
+    .create({
+      resource: {
+        name: OperationId,
+        parents: [salesFolderId],
+      },
+      media: {
+        mimeType: "image/jpeg",
+        body: stream,
+      },
+      fields: "id",
+    })
+    .then((res) => {
+      console.info("success: file uploaded");
+      return res.data.id;
+    })
+    .catch((err) => console.error(err));
+
+  // push photo url and invoice id
+
+  values[0].splice(0, 0, `https://us-central1-golden-stream-turkey.cloudfunctions.net/server/retriveSaleInvoicePhoto/${fileId}`);
+  values[0].splice(0, 0, OperationId);
+  googleSheetsApi.spreadsheets.values
+    .append({
+      spreadsheetId,
+      range: salesRange,
+      insertDataOption: "INSERT_ROWS",
+      resource: { values },
+      valueInputOption: "RAW",
+    })
+    .then(() => console.log("Spreadsheet Updated"))
+    .catch((err) => console.error(err));
+};
+
+const retriveSaleInvoicePhoto = async (fileId) => {
+  console.log("fileId: ",fileId)
+  return await googleDriveApi.files
+    .get({ fileId, alt: "media" }, { responseType: "stream" })
+    .then((res) => {
+      return new Promise((resolve, reject) => {
+        const filePath = path.join(os.tmpdir(), uuid.v4() + ".jpg");
+        console.log(`writing to ${filePath}`);
+        const dest = fs.createWriteStream(filePath);
+        let progress = 0;
+
+        res.data
+          .on("end", () => {
+            console.log("Done downloading file.");
+            resolve(filePath);
+          })
+          .on("error", (err) => {
+            console.error("Error downloading file.");
+            reject(err);
+          })
+          .on("data", (d) => {
+            progress += d.length;
+            if (process.stdout.isTTY) {
+              process.stdout.clearLine();
+              process.stdout.cursorTo(0);
+              process.stdout.write(`Downloaded ${progress} bytes`);
+            }
+          })
+          .pipe(dest);
+
+        return filePath;
+      });
+    });
+};
+
+
+// Express
+
 const express = require("express");
 const cors = require("cors");
 const server = express();
@@ -149,22 +253,32 @@ server.use(bodyParser.json({ limit: "50mb" }));
 server.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 server.use(cors());
 
-server.post("/api/addInvoice", async (req, res, next) => {
+server.post("/api/addPurchase", async (req, res, next) => {
   const { values, image } = req.body;
-  addInvoice({ values, image });
+  addPurchase({ values, image });
   res.send("Done!");
 });
 
-server.get("/getInvoiceCopy/:fileId", async (req, res, next) => {
+server.get("/retrivePurchaseInvoicePhoto/:fileId", async (req, res, next) => {
   const fileId = req.params.fileId;
-  const fileName = await getInvoiceFilePath(fileId);
+  const fileName = await retrivePurchaseInvoicePhoto(fileId);
 
   if (fileName) res.status(200).download(fileName);
   else res.status(404).end();
 });
 
-exports.s = functions.https.onRequest(server);
+server.post("/api/addSale", async (req, res, next) => {
+  const { values, image } = req.body;
+  addSale({ values, image });
+  res.send("Done!");
+});
 
-exports.hello= functions.https.onRequest((req,res)=>{
-    res.status(200).send('Hello!')
-})
+server.get("/retriveSaleInvoicePhoto/:fileId", async (req, res, next) => {
+  const fileId = req.params.fileId;
+  const fileName = await retriveSaleInvoicePhoto(fileId);
+
+  if (fileName) res.status(200).download(fileName);
+  else res.status(404).end();
+});
+
+exports.server = functions.https.onRequest(server);

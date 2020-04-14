@@ -1,4 +1,6 @@
-# create reset script
+# TODO
+
+## create reset script
 
 To remove (node_modules, .gradle, android, ios, build)
 
@@ -14,3 +16,9 @@ To remove (node_modules, .gradle, android, ios, build)
 
     ionic cap run ios -l --external
     ionic cap run android -l --external
+
+## create useForm hook
+
+## replace modals by routes
+
+## create authContext

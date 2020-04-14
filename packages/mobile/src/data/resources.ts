@@ -203,6 +203,17 @@ const paymentMethodResources = {
       supplierLabel: "Tedarikçi",
     },
   };
+  const customerResources = {
+    en: {
+      customerLabel: "Customer",
+    },
+    ar: {
+      customerLabel: "الزبون",
+    },
+    tr: {
+      customerLabel: "Müşteri",
+    },
+  };
 
   const sendButtonResources = {
     en: {
@@ -230,9 +241,103 @@ const paymentMethodResources = {
       toastFailureMessage: 'Hata',
     },
   }
+
+  const loadingResources = {
+    en : {
+      loadingMessage: 'Loading...'
+    },
+    ar: {
+      loadingMessage: '...جار التحميل'
+    },
+    tr : {
+      loadingMessage: 'Yükleniyor...'
+    },
+  }
+
+  const cameraResources = {
+    en: {
+      cameraClosedMessage: 'Camera Closed',
+      cameraNotAvailableMessage: 'Camera not available'
+    },
+    ar: {
+      cameraClosedMessage: 'تم إغلاق الكاميرا',
+      cameraNotAvailableMessage: 'الكاميرا غير متاحة'
+    },
+    tr: {
+      cameraClosedMessage: 'Ckamera Kapalı',
+      cameraNotAvailableMessage:'Kamera mevcut değil'
+    },
+  }
+
+  const layoutResources ={
+    en:{
+      layoutHomeLabel: 'Home',
+      layoutSalesLabel : 'Sales',
+      layoutPurchasesLabel : 'Purchases',
+      layoutSettingsLabel : 'Settings',
+      backButtonLabel: 'Back'
+
+    },
+    ar:{
+      layoutHomeLabel: 'الصفحة الرئيسية',
+      layoutSalesLabel : 'المبيعات',
+      layoutPurchasesLabel : 'المشتريات',
+      layoutSettingsLabel : 'إعدادات',
+      backButtonLabel: 'الخلف'
+
+    },
+    tr:{
+      layoutHomeLabel: 'Ana Sayfa',
+      layoutSalesLabel : 'Satış',
+      layoutPurchasesLabel : 'Satınalmalar',
+      layoutSettingsLabel : 'Ayarlar',
+      backButtonLabel: 'Geri'
+
+    },
+  }
+
+  const settingsResources ={
+    en: {
+      languages: 'Languages',
+      languageOptions:{
+        Arabic: 'Arabic',
+        English: 'English',
+        Turkish: 'Turkish'
+      },
+      darkModeLabel:'Dark Mode',
+      signOutButton: 'Sign Out'
+    },
+    
+    ar: {
+      languages: 'اللغات',
+      languageOptions:{
+        Arabic: 'العربية',
+        English: 'الإنجليزية',
+        Turkish: 'التركية'
+      },
+      darkModeLabel:'الوضع الداكن',
+      signOutButton: 'تسجيل الخروج'
+    },
+    tr: {
+      languages: 'Diller',
+      languageOptions:{
+        Arabic: 'Arapça',
+        English: 'İngilizce',
+        Turkish: 'Türkçe'
+      },
+      darkModeLabel:'Karanlık Mod',
+      signOutButton: 'Oturumu Kapat'
+    },
+
+  }
   
   export const RESOURCES = {
     en: {
+      ...settingsResources.en,
+      ...layoutResources.en,
+      ...customerResources.en,
+      ...cameraResources.en,
+      ...loadingResources.en,
       ...toasResources.en,
       ...sendButtonResources.en,
       ...supplierResources.en,
@@ -244,6 +349,11 @@ const paymentMethodResources = {
       ...pickerResources.en,
     },
     ar: {
+      ...settingsResources.ar,
+      ...layoutResources.ar,
+      ...customerResources.ar,
+      ...cameraResources.ar,
+      ...loadingResources.ar,
       ...toasResources.ar,
       ...sendButtonResources.ar,
       ...supplierResources.ar,
@@ -255,6 +365,11 @@ const paymentMethodResources = {
       ...pickerResources.ar,
     },
     tr: {
+      ...settingsResources.tr,
+      ...layoutResources.tr,
+      ...customerResources.tr,
+      ...cameraResources.tr,
+      ...loadingResources.tr,
       ...toasResources.tr,
       ...sendButtonResources.tr,
       ...supplierResources.tr,
