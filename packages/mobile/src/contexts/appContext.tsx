@@ -52,9 +52,7 @@ export const AppContextProvider = ({ children }) => {
   useEffect(() => {
     if (localStorage.getItem("language")) {
       setLanguage(localStorage.getItem("language") as Languages);
-    } 
-    
-    else {
+    } else {
       const { Device } = Plugins;
       Device.getLanguageCode().then((deviceLanguage) => {
         if (Languages[deviceLanguage.value.substring(0, 2)])
@@ -63,9 +61,9 @@ export const AppContextProvider = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("language" as Languages, language);
-  }, [language]);
+  // useEffect(() => {
+  //   localStorage.setItem("language" as Languages, language);
+  // }, [language]);
 
   const setLanguage = (language: Languages) => {
     dispatch({ type: SET_LANGUAGE, payload: language });

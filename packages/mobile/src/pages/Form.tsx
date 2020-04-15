@@ -12,6 +12,8 @@ import {
   IonInput,
   IonSelect,
   IonSelectOption,
+  IonHeader,
+  IonToolbar
 } from "@ionic/react";
 
 import {
@@ -21,7 +23,8 @@ import {
   cashOutline,
   walletOutline,
   createOutline,
-  paperPlaneOutline,
+  paperPlane,
+  close,
 } from "ionicons/icons";
 
 import React, { useState, useEffect, useContext } from "react";
@@ -49,7 +52,8 @@ const initialValues = {
 export const Form = () => {
   const history = useHistory();
   const location = useLocation();
-
+ const [canSubmit, setCanSubmit] = useState(false);
+  const [values, setValues] = useState(initialValues);
   const { setLoading, setToast, language } = useContext(AppContext);
 
   const { photoBase64 } = useContext(PhotoContext);
@@ -61,11 +65,9 @@ export const Form = () => {
     }
   }, [photoBase64, history]);
 
-  const [canSubmit, setCanSubmit] = useState(false);
-  const [values, setValues] = useState(initialValues);
+ 
 
   useEffect(() => {
-    console.info(values);
     if (
       values.amount !== "" &&
       values.category !== "" &&
@@ -78,6 +80,10 @@ export const Form = () => {
     )
       setCanSubmit(true);
   }, [values]);
+
+  // useEffect(() => {
+  //   return () => setValues(initialValues);
+  // }, []);
 
   const submit = (e) => {
     e.preventDefault();
@@ -114,7 +120,6 @@ export const Form = () => {
         history.push("/home");
       })
       .catch(function (error) {
-        console.log(error);
         setLoading({ duration: 0, isOpen: false, message: "" });
         setToast({
           duration: 2000,
@@ -129,6 +134,25 @@ export const Form = () => {
     <>
       {location.state && location.state["operationType"] ? (
         <IonPage>
+          <IonHeader translucent>
+            <IonToolbar>
+              <IonButton slot="start" fill="clear">
+                <IonIcon
+                  slot="start"
+                  icon={close}
+                />
+                {RESOURCES[language].cancelButton}
+              </IonButton>
+              <IonButton slot="end" fill="clear" onClick={submit} disabled={!canSubmit}>
+                <IonIcon
+                  slot="end"
+                  icon={paperPlane}
+                />
+                {RESOURCES[language].sendButtonText}
+              </IonButton>
+
+            </IonToolbar>
+          </IonHeader>
           <IonContent fullscreen={true}>
             <IonContent fullscreen={true}>
               <form className={"form"} onSubmit={submit}>
@@ -158,9 +182,9 @@ export const Form = () => {
                       okText={RESOURCES[language].okButton}
                       cancelText={RESOURCES[language].cancelButton}
                       value={
-                        RESOURCES[language].categoryOptions[values.category]
+                        values.category
                       }
-                      placeholder="Select One"
+                      placeholder="..."
                       onIonChange={(e) => {
                         setValues({ ...values, category: e.detail.value });
                       }}
@@ -231,7 +255,6 @@ export const Form = () => {
                             `${e.detail.value}/`
                           ),
                         });
-                        console.log("DD Updated");
                       }}
                     >
                       {Array.from({ length: 31 }, (_, i) => i + 1).map(
@@ -261,7 +284,6 @@ export const Form = () => {
                             `/${e.detail.value}/`
                           ),
                         });
-                        console.log("MM Updated");
                       }}
                     >
                       {Array.from({ length: 12 }, (_, i) => i + 1).map(
@@ -291,7 +313,6 @@ export const Form = () => {
                             `/${e.detail.value}`
                           ),
                         });
-                        console.log("YYYY Updated");
                       }}
                     >
                       {Array.from(
@@ -330,13 +351,13 @@ export const Form = () => {
                         setValues({ ...values, paymentMethod: e.detail.value });
                       }}
                     >
-                      {Object.entries(RESOURCES[language].paymentMethodOptions).map(
-                        ([key, value], index) => (
-                          <IonSelectOption value={key} key={index}>
-                            {value}
-                          </IonSelectOption>
-                        )
-                      )}
+                      {Object.entries(
+                        RESOURCES[language].paymentMethodOptions
+                      ).map(([key, value], index) => (
+                        <IonSelectOption value={key} key={index}>
+                          {value}
+                        </IonSelectOption>
+                      ))}
                     </IonSelect>
                   </IonItem>
 
@@ -411,7 +432,7 @@ export const Form = () => {
                       {RESOURCES[language].notesLabel}
                     </IonLabel>
                     <IonTextarea
-                    tabIndex={9} 
+                      tabIndex={9}
                       className="ion-no-padding"
                       placeholder="..."
                       dir={language === Languages.Arabic ? "ltr" : "rtl"}
@@ -421,18 +442,12 @@ export const Form = () => {
                       }
                     />
                   </IonItem>
-                </IonList>
 
-                <IonButton
-                  tabIndex={10}
-                  disabled={!canSubmit}
-                  expand="block"
-                  type="submit"
-                  className=" ion-margin"
-                >
-                  <IonIcon slot="start" icon={paperPlaneOutline} />
-                  {RESOURCES[language].sendButtonText}
-                </IonButton>
+
+
+
+                  
+                </IonList>
               </form>
             </IonContent>
           </IonContent>
