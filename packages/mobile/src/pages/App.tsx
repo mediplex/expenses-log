@@ -17,8 +17,10 @@ import { Route, Redirect } from "react-router";
 import { home, cart, wallet, settings } from "ionicons/icons";
 import { IonReactRouter } from "@ionic/react-router";
 import { AppContext } from "../contexts/appContext";
-import { Languages } from "../enums/Languages";
 import { RESOURCES } from "../data/resources";
+import { Languages } from "../enums/Languages";
+
+
 
 const routes = [
   {
@@ -51,9 +53,8 @@ const routes = [
 export const App = () => {
   const { language } = useContext(AppContext);
 
-
   return (
-    <IonApp dir={language === Languages.Arabic ? "rtl" : "ltr"}>
+    <IonApp lang={language} dir={language===Languages.Arabic? 'rtl':'ltr'}>
       <IonReactRouter >
           <IonTabs >
             <IonRouterOutlet >

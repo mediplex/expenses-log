@@ -7,7 +7,7 @@ import {
   IonSelect,
   IonSelectOption,
   IonToggle,
-  IonButton,
+  IonButton
 } from "@ionic/react";
 import React, { useContext } from "react";
 import { person, globe, moon } from "ionicons/icons";
@@ -16,7 +16,7 @@ import { AppContext } from "../contexts/appContext";
 import { Layout } from "../components/Layout";
 import { RESOURCES } from "../data/resources";
 
-export const Settings = ({title}) => {
+export const Settings = ({ title }) => {
   const { language, setLanguage } = useContext(AppContext);
 
   return (
@@ -33,12 +33,12 @@ export const Settings = ({title}) => {
 
           <IonItem>
             <IonIcon icon={globe} slot="start" />
-                <IonLabel>{RESOURCES[language].languages}</IonLabel>
+            <IonLabel>{RESOURCES[language].languages}</IonLabel>
             <IonSelect
               slot="end"
               value={language}
-              okText="Ok"
-              cancelText="Cancel"
+              okText={RESOURCES[language].okButton}
+              cancelText={RESOURCES[language].cancelButton}
               onIonChange={(e) => setLanguage(e.detail.value)}
             >
               {Object.entries(Languages).map(([key, value]) => (
@@ -48,10 +48,11 @@ export const Settings = ({title}) => {
               ))}
             </IonSelect>
           </IonItem>
+
+
           <IonItem>
             <IonIcon icon={moon} slot="start" />
-            <IonLabel>{RESOURCES[language].darkModeLabel}
-            </IonLabel>
+            <IonLabel>{RESOURCES[language].darkModeLabel}</IonLabel>
             <IonToggle />
           </IonItem>
         </IonList>

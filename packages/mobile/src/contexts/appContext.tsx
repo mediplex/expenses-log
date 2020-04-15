@@ -1,6 +1,7 @@
 import React, { createContext, useReducer, useEffect } from "react";
 import { Languages } from "../enums/Languages";
 import { IonLoading, IonToast } from "@ionic/react";
+import { Plugins } from "@capacitor/core";
 
 const initialAppState = {
   language: Languages.English,
@@ -45,26 +46,26 @@ export const AppContextProvider = ({ children }) => {
   // console.log(navigator.onLine);
   // console.log(navigator.storage);
   const [appState, dispatch] = useReducer(appReducer, initialAppState);
-
-  // useEffect(() => {
-  //   if (navigator.language && Languages[navigator.language.substr(0, 2)])
-  //     setLanguage(Languages[navigator.language.substr(0, 2)]);
-  // }, [navigator.language]);
- const darkMode: boolean = appState.darkMode;
+  const darkMode: boolean = appState.darkMode;
   const language: Languages = appState.language;
 
-
-  useEffect(()=>{
-    if (localStorage.getItem('language')) {
-      setLanguage(localStorage.getItem('language') as Languages)
+  useEffect(() => {
+    if (localStorage.getItem("language")) {
+      setLanguage(localStorage.getItem("language") as Languages);
+    } 
+    
+    else {
+      const { Device } = Plugins;
+      Device.getLanguageCode().then((deviceLanguage) => {
+        if (Languages[deviceLanguage.value.substring(0, 2)])
+          setLanguage(Languages[deviceLanguage.value.substring(0, 2)]);
+      });
     }
-  },[])
+  }, []);
 
-  useEffect(()=>{
-    localStorage.setItem('language' as Languages,language)
-  },[language])
-
- 
+  useEffect(() => {
+    localStorage.setItem("language" as Languages, language);
+  }, [language]);
 
   const setLanguage = (language: Languages) => {
     dispatch({ type: SET_LANGUAGE, payload: language });
@@ -81,8 +82,6 @@ export const AppContextProvider = ({ children }) => {
   const setDarkMode = (isEnabled) => {
     dispatch({ type: SET_DARK_MODE, payload: { isEnabled } });
   };
-
-
 
   return (
     <AppContext.Provider

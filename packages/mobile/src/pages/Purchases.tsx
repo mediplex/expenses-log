@@ -7,7 +7,6 @@ import { useHistory } from "react-router";
 import { OperationType } from "../enums/OperationType";
 import { AppContext } from "../contexts/appContext";
 import { RESOURCES } from "../data/resources";
-import { title } from "process";
 
 export const Purchases = () => {
   const history = useHistory();
