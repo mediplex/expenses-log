@@ -4,11 +4,5 @@
   "bundledWebRuntime": false,
   "npmClient": "yarn",
   "webDir": "build",
-  "cordova": {},
-  "server": {
-    "url": "http://192.168.1.38:8102",
-    "cleartext": true,
-    "originalUrl": "http://192.168.1.38:8101",
-    "originalCleartext": true
-  }
+  "cordova": {}
 }

@@ -28,6 +28,7 @@ const paymentMethodResources = {
   const categoryResources = {
     en: {
       categoryOptions: {
+        'Restaurant Expenses':'Restaurant Expenses',
         'Computer Equipments': 'Computer Equipments',
         'Computer Software': 'Computer Software',
         'Freelance/Independent Contractor Labor': 'Freelance/Independent Contractor Labor',
@@ -52,6 +53,7 @@ const paymentMethodResources = {
     },
     ar: {
       categoryOptions: {
+        'Restaurant Expenses': 'مصاريف المطعم',
         'Computer Equipments': 'معدات الكمبيوتر',
         'Computer Software': 'برامج الكمبيوتر',
         'Freelance/Independent Contractor Labor': 'عمل مستقل / مقاول مستقل',
@@ -76,6 +78,7 @@ const paymentMethodResources = {
     },
     tr: {
       categoryOptions: {
+        'Restaurant Expenses': 'Restorant Giderleri',
         'Computer Equipments': 'Bilgisayar Ekipmanları',
         'Computer Software': 'Bilgisayar yazılımı',
         'Freelance/Independent Contractor Labor': 'Serbest / Bağımsız Müteahhit İşgücü',

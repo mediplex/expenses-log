@@ -13,7 +13,8 @@ import {
   IonSelect,
   IonSelectOption,
   IonHeader,
-  IonToolbar
+  IonToolbar,
+  IonProgressBar,
 } from "@ionic/react";
 
 import {
@@ -52,11 +53,16 @@ const initialValues = {
 export const Form = () => {
   const history = useHistory();
   const location = useLocation();
- const [canSubmit, setCanSubmit] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
   const [values, setValues] = useState(initialValues);
   const { setLoading, setToast, language } = useContext(AppContext);
+  const [progressBarValue, setProgressBarValue] = useState(0);
 
   const { photoBase64 } = useContext(PhotoContext);
+
+  useEffect(()=>{
+    setValues(initialValues)
+  },[location])
 
   useEffect(() => {
     if (!photoBase64) {
@@ -64,8 +70,6 @@ export const Form = () => {
       //! error: Photo is missing. Cannot continue without photo
     }
   }, [photoBase64, history]);
-
- 
 
   useEffect(() => {
     if (
@@ -81,9 +85,28 @@ export const Form = () => {
       setCanSubmit(true);
   }, [values]);
 
-  // useEffect(() => {
-  //   return () => setValues(initialValues);
-  // }, []);
+  useEffect(() => {
+    let progress = 0;
+
+    if (values.amount !== "") progress++;
+
+    if (values.category !== "") progress++;
+
+    if (values.currency !== "") progress++;
+
+    if (values.paymentMethod !== "") progress++;
+
+    // if (values.responsible !== "") progress++;
+
+    if (values.supplierOrCustomer !== "") progress++;
+
+    if (!values.transactionDate.includes("00/")) progress++;
+
+    if (!values.transactionDate.includes("0000")) progress++;
+
+    setProgressBarValue(progress/7);
+
+  }, [values]);
 
   const submit = (e) => {
     e.preventDefault();
@@ -109,7 +132,6 @@ export const Form = () => {
         }
       )
       .then(() => {
-        setValues(initialValues);
         setLoading({ duration: null, isOpen: false, message: "" });
         setToast({
           duration: 2000,
@@ -136,23 +158,23 @@ export const Form = () => {
         <IonPage>
           <IonHeader translucent>
             <IonToolbar>
-              <IonButton slot="start" fill="clear">
-                <IonIcon
-                  slot="start"
-                  icon={close}
-                />
+              <IonButton slot="start" fill="clear" onClick={()=> history.push('/home')}>
+                <IonIcon slot="start" icon={close} />
                 {RESOURCES[language].cancelButton}
               </IonButton>
-              <IonButton slot="end" fill="clear" onClick={submit} disabled={!canSubmit}>
-                <IonIcon
-                  slot="end"
-                  icon={paperPlane}
-                />
+              <IonButton
+                slot="end"
+                fill="clear"
+                onClick={submit}
+                disabled={!canSubmit}
+              >
+                <IonIcon slot="end" icon={paperPlane} />
                 {RESOURCES[language].sendButtonText}
               </IonButton>
-
             </IonToolbar>
+            <IonProgressBar value={progressBarValue} reversed={language === Languages.Arabic}></IonProgressBar>
           </IonHeader>
+
           <IonContent fullscreen={true}>
             <IonContent fullscreen={true}>
               <form className={"form"} onSubmit={submit}>
@@ -178,12 +200,10 @@ export const Form = () => {
 
                     <IonSelect
                       tabIndex={1}
-                      interface="popover"
+                      interface="action-sheet"
                       okText={RESOURCES[language].okButton}
                       cancelText={RESOURCES[language].cancelButton}
-                      value={
-                        values.category
-                      }
+                      value={values.category}
                       placeholder="..."
                       onIonChange={(e) => {
                         setValues({ ...values, category: e.detail.value });
@@ -200,7 +220,7 @@ export const Form = () => {
                   </IonItem>
 
                   {/* supplier or customer*/}
-                  <IonItem detail={false}>
+                  <IonItem >
                     <IonIcon
                       icon={walletOutline}
                       color="medium"
@@ -242,7 +262,7 @@ export const Form = () => {
                     </IonLabel>
                     <IonSelect
                       tabIndex={3}
-                      interface="popover"
+                      interface="action-sheet"
                       okText={RESOURCES[language].okButton}
                       cancelText={RESOURCES[language].cancelButton}
                       value={values.transactionDate.substring(0, 2)}
@@ -271,7 +291,7 @@ export const Form = () => {
 
                     <IonSelect
                       tabIndex={4}
-                      interface="popover"
+                      interface="action-sheet"
                       okText={RESOURCES[language].okButton}
                       cancelText={RESOURCES[language].cancelButton}
                       value={values.transactionDate.substring(3, 5)}
@@ -300,7 +320,7 @@ export const Form = () => {
 
                     <IonSelect
                       tabIndex={5}
-                      interface="popover"
+                      interface="action-sheet"
                       okText={RESOURCES[language].okButton}
                       cancelText={RESOURCES[language].cancelButton}
                       value={values.transactionDate.substring(6, 10)}
@@ -342,7 +362,7 @@ export const Form = () => {
                     </IonLabel>
                     <IonSelect
                       tabIndex={6}
-                      interface="popover"
+                      interface="action-sheet"
                       okText={RESOURCES[language].okButton}
                       cancelText={RESOURCES[language].cancelButton}
                       value={values.paymentMethod}
@@ -362,7 +382,7 @@ export const Form = () => {
                   </IonItem>
 
                   {/* Amount */}
-                  <IonItem detail={false}>
+                  <IonItem>
                     <IonIcon
                       icon={walletOutline}
                       color="medium"
@@ -374,10 +394,9 @@ export const Form = () => {
                     </IonLabel>
                     <IonInput
                       tabIndex={7}
-                      className="ion-no-padding"
+                      className=" ion-text-end"
                       placeholder="..."
                       min="0"
-                      dir={language === Languages.Arabic ? "ltr" : "rtl"}
                       type="number"
                       step="any"
                       inputMode="decimal"
@@ -402,7 +421,7 @@ export const Form = () => {
                     </IonLabel>
                     <IonSelect
                       tabIndex={8}
-                      interface="popover"
+                      interface="action-sheet"
                       okText={RESOURCES[language].okButton}
                       cancelText={RESOURCES[language].cancelButton}
                       value={values.currency}
@@ -422,7 +441,7 @@ export const Form = () => {
                   </IonItem>
 
                   {/* Notes */}
-                  <IonItem detail={false}>
+                  <IonItem>
                     <IonIcon
                       icon={createOutline}
                       color="medium"
@@ -433,20 +452,15 @@ export const Form = () => {
                     </IonLabel>
                     <IonTextarea
                       tabIndex={9}
-                      className="ion-no-padding"
+                      className="ion-text-end"
                       placeholder="..."
-                      dir={language === Languages.Arabic ? "ltr" : "rtl"}
+                     
                       value={values.notes}
                       onIonChange={(e) =>
                         setValues({ ...values, notes: e.detail.value })
                       }
                     />
                   </IonItem>
-
-
-
-
-                  
                 </IonList>
               </form>
             </IonContent>

@@ -13,7 +13,7 @@ import {
   IonApp,
 } from "@ionic/react";
 import React, { useContext } from "react";
-import { Route, Redirect } from "react-router";
+import { Route, Redirect, useLocation } from "react-router";
 import { home, cart, wallet, settings } from "ionicons/icons";
 import { IonReactRouter } from "@ionic/react-router";
 import { AppContext } from "../contexts/appContext";
